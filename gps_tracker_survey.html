@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enquête Traceur GPS pour véhicules</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .form-content {
+            padding: 40px 30px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .question {
+            margin-bottom: 35px;
+        }
+
+        .question-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .required {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        .question-note {
+            font-size: 13px;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .option {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option input {
+            vertical-align: middle;
+        }
+
+        .option label {
+            cursor: pointer;
+            display: inline;
+            vertical-align: middle;
+            user-select: none;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .range-container {
+            padding: 20px 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            accent-color: #667eea;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .range-value {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            background: #f8f9ff;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .form-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sécuriser votre véhicule en 3 min 🚗🔒</h1>
+            <p>Nous développons un traceur GPS pour localiser votre véhicule par SMS. Aidez-nous en répondant à cette enquête (3 minutes). Anonyme et confidentiel. Merci !</p>
+        </div>
+
+        <div class="form-content">
+            <h2 class="section-title">QUESTIONS ESSENTIELLES</h2>
+
+            <form id="surveyForm">
+                <!-- Q1 -->
+                <div class="question">
+                    <label class="question-label">Q1- Vous êtes : <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1a" value="particulier" required>
+                        <label for="q1a">Particulier (propriétaire voiture/moto/camping-car)</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1b" value="pme">
+                        <label for="q1b">Chef d'entreprise/PME (2-10 véhicules)</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1c" value="professionnel">
+                        <label for="q1c">Professionnel (location, transport, livraison)</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q1" id="q1d" value="parent">
+                        <label for="q1d">Parent d'un jeune conducteur</label>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="question">
+                    <label class="question-label">Q2- Combien de véhicules possédez-vous/gérez-vous ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2a" value="1" required>
+                        <label for="q2a">1 véhicule</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2b" value="2-3">
+                        <label for="q2b">2-3 véhicules</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2c" value="4-6">
+                        <label for="q2c">4-6 véhicules</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2d" value="7-10">
+                        <label for="q2d">7-10 véhicules</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q2" id="q2e" value="10+">
+                        <label for="q2e">Plus de 10 véhicules</label>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="question">
+                    <label class="question-label">Q3- Avez-vous déjà été victime de vol de véhicule ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3a" value="oui" required>
+                        <label for="q3a">Oui</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3b" value="connais_victimes">
+                        <label for="q3b">Non, mais je connais des victimes</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q3" id="q3c" value="non">
+                        <label for="q3c">Non, jamais</label>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="question">
+                    <label class="question-label">Q4- Quel est votre PRINCIPAL besoin ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4a" value="anti_vol" required>
+                        <label for="q4a">Sécurité anti-vol</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4b" value="surveiller_jeune">
+                        <label for="q4b">Surveiller un jeune conducteur</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4c" value="gestion_flotte">
+                        <label for="q4c">Gérer ma flotte professionnelle</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4d" value="retrouver">
+                        <label for="q4d">Retrouver mon véhicule (parking, prêt)</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q4" id="q4e" value="controle_location">
+                        <label for="q4e">Contrôler un véhicule loué/prêté</label>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="question">
+                    <label class="question-label">Q5- Utilisez-vous déjà un traceur GPS ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5a" value="oui_satisfait" required>
+                        <label for="q5a">Oui, et je suis satisfait</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5b" value="oui_insatisfait">
+                        <label for="q5b">Oui, mais insatisfait (coût, complexité, fiabilité)</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5c" value="non_interesse">
+                        <label for="q5c">Non, mais ça m'intéresse</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q5" id="q5d" value="non_pas_interesse">
+                        <label for="q5d">Non, pas intéressé</label>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="question">
+                    <label class="question-label">Q6- Quelles fonctionnalités sont INDISPENSABLES pour vous ? <span class="required">*</span></label>
+                    <div class="question-note">Maximum 3 choix</div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6a" value="precision">
+                        <label for="q6a">Localisation précise (±5m)</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6b" value="sms">
+                        <label for="q6b">Envoi position par SMS</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6c" value="alerte_mouvement">
+                        <label for="q6c">Alerte mouvement non autorisé</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6d" value="historique">
+                        <label for="q6d">Historique des trajets</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6e" value="geofencing">
+                        <label for="q6e">Alertes zones interdites (géofencing)</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6f" value="vitesse">
+                        <label for="q6f">Alerte excès de vitesse</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6g" value="autonomie">
+                        <label for="q6g">Longue autonomie batterie (48-72h)</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6h" value="installation">
+                        <label for="q6h">Installation simple</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q6" id="q6i" value="autre">
+                        <label for="q6i">Autre :</label>
+                        <input type="text" name="q6_autre" placeholder="Précisez..." style="margin-top: 8px;">
+                    </div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="question">
+                    <label class="question-label">Q7- Quel BUDGET acceptez-vous pour l'achat du traceur ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7a" value="<80" required>
+                        <label for="q7a">Moins de 80 dinars</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7b" value="80-120">
+                        <label for="q7b">80-120 dinars</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7c" value="120-180">
+                        <label for="q7c">120-180 dinars</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7d" value="180-250">
+                        <label for="q7d">180-250 dinars</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q7" id="q7e" value="250+">
+                        <label for="q7e">Plus de 250 dinars</label>
+                    </div>
+                </div>
+
+                <!-- Q8 -->
+                <div class="question">
+                    <label class="question-label">Q8- Quel coût MENSUEL maximum pour les SMS/communications ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8a" value="<5" required>
+                        <label for="q8a">Moins de 5 dinars/mois</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8b" value="5-10">
+                        <label for="q8b">5-10 dinars/mois</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8c" value="10-20">
+                        <label for="q8c">10-20 dinars/mois</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8d" value="20+">
+                        <label for="q8d">Plus de 20 dinars/mois</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q8" id="q8e" value="sans_abonnement">
+                        <label for="q8e">Je préfère SANS abonnement (paiement à l'usage)</label>
+                    </div>
+                </div>
+
+                <!-- Q9 -->
+                <div class="question">
+                    <label class="question-label">Q9- Quelle formule préférez-vous ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q9" id="q9a" value="achat_sms" required>
+                        <label for="q9a">Achat unique + SMS à la demande (pas d'abonnement)</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q9" id="q9b" value="achat_abonnement">
+                        <label for="q9b">Achat + abonnement mensuel fixe</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q9" id="q9c" value="location">
+                        <label for="q9c">Location mensuelle tout inclus</label>
+                    </div>
+                </div>
+
+                <!-- Q10 -->
+                <div class="question">
+                    <label class="question-label">Q10- Comment voulez-vous recevoir la localisation ? <span class="required">*</span></label>
+                    <div class="question-note">Maximum 2 choix</div>
+                    <div class="option">
+                        <input type="checkbox" name="q10" id="q10a" value="sms">
+                        <label for="q10a">SMS avec lien Google Maps</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q10" id="q10b" value="app">
+                        <label for="q10b">Application mobile</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q10" id="q10c" value="whatsapp">
+                        <label for="q10c">WhatsApp/Telegram</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" name="q10" id="q10d" value="email">
+                        <label for="q10d">Email</label>
+                    </div>
+                </div>
+
+                <!-- Q11 -->
+                <div class="question">
+                    <label class="question-label">Q11- Êtes-vous prêt à l'installer vous-même (branchement simple) ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q11" id="q11a" value="oui_tutoriel" required>
+                        <label for="q11a">Oui, si tutoriel clair fourni</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q11" id="q11b" value="peut_etre">
+                        <label for="q11b">Peut-être, selon difficulté</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q11" id="q11c" value="non_pro">
+                        <label for="q11c">Non, installation professionnelle obligatoire</label>
+                    </div>
+                </div>
+
+                <!-- Q12 -->
+                <div class="question">
+                    <label class="question-label">Q12- Sur 10, quel est votre intérêt pour ce produit ? <span class="required">*</span></label>
+                    <div class="range-container">
+                        <div class="range-value" id="rangeValue">5</div>
+                        <input type="range" name="q12" id="q12" min="1" max="10" value="5" required>
+                        <div class="range-labels">
+                            <span>1 - Pas du tout intéressé</span>
+                            <span>10 - Très intéressé</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q13 -->
+                <div class="question">
+                    <label class="question-label">Q13- Si disponible à 120-150 dinars aujourd'hui, l'achèteriez-vous ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q13" id="q13a" value="oui_immediat" required>
+                        <label for="q13a">Oui, immédiatement</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q13" id="q13b" value="oui_3-6mois">
+                        <label for="q13b">Oui, dans les 3-6 mois</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q13" id="q13c" value="peut_etre">
+                        <label for="q13c">Peut-être, besoin d'infos</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q13" id="q13d" value="non_cher">
+                        <label for="q13d">Non, trop cher</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q13" id="q13e" value="non_interesse">
+                        <label for="q13e">Non, pas intéressé</label>
+                    </div>
+                </div>
+
+                <!-- Q14 -->
+                <div class="question">
+                    <label class="question-label">Q14- Votre âge ? <span class="required">*</span></label>
+                    <div class="option">
+                        <input type="radio" name="q14" id="q14a" value="18-30" required>
+                        <label for="q14a">18-30 ans</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q14" id="q14b" value="31-45">
+                        <label for="q14b">31-45 ans</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q14" id="q14c" value="46-60">
+                        <label for="q14c">46-60 ans</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" name="q14" id="q14d" value="60+">
+                        <label for="q14d">Plus de 60 ans</label>
+                    </div>
+                </div>
+
+                <!-- Q15 -->
+                <div class="question">
+                    <label class="question-label">Q15- Quelle fonctionnalité manquante vous ferait acheter ?</label>
+                    <div class="question-note">Optionnel</div>
+                    <textarea name="q15" placeholder="Décrivez les fonctionnalités supplémentaires que vous aimeriez..."></textarea>
+                </div>
+
+                <!-- Email optionnel -->
+                <div class="question">
+                    <label class="question-label">Voulez-vous être informé du lancement ?</label>
+                    <div class="question-note">Optionnel - Laissez votre email</div>
+                    <input type="email" name="email" placeholder="votre.email@exemple.com">
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    ✅ Merci ! Votre réponse a été enregistrée avec succès.
+                </div>
+
+                <button type="submit" class="submit-btn">Envoyer mes réponses</button>
+            </form>
+        </div>
+
+        <div class="footer">
+            Merci ! Vos réponses sont précieuses. Si vous avez laissé votre email, nous vous contacterons lors du lancement. 🚗📍
+            <br><br>
+            <strong>Cette enquête est anonyme et confidentielle.</strong>
+        </div>
+    </div>
+
+    <script>
+        // Range slider value display
+        const rangeInput = document.getElementById('q12');
+        const rangeValue = document.getElementById('rangeValue');
+        
+        rangeInput.addEventListener('input', function() {
+            rangeValue.textContent = this.value;
+        });
+
+        // Checkbox limitation (Q6 - max 3 choices)
+        const q6Checkboxes = document.querySelectorAll('input[name="q6"]');
+        q6Checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkedCount = document.querySelectorAll('input[name="q6"]:checked').length;
+                if (checkedCount > 3) {
+                    this.checked = false;
+                    alert('Maximum 3 fonctionnalités peuvent être sélectionnées.');
+                }
+            });
+        });
+
+        // Checkbox limitation (Q10 - max 2 choices)
+        const q10Checkboxes = document.querySelectorAll('input[name="q10"]');
+        q10Checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkedCount = document.querySelectorAll('input[name="q10"]:checked').length;
+                if (checkedCount > 2) {
+                    this.checked = false;
+                    alert('Maximum 2 options peuvent être sélectionnées.');
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate Q6 (at least 1 checkbox)
+            const q6Checked = document.querySelectorAll('input[name="q6"]:checked').length;
+            if (q6Checked === 0) {
+                alert('Veuillez sélectionner au moins une fonctionnalité indispensable (Q6).');
+                return;
+            }
+
+            // Validate Q10 (at least 1 checkbox)
+            const q10Checked = document.querySelectorAll('input[name="q10"]:checked').length;
+            if (q10Checked === 0) {
+                alert('Veuillez sélectionner au moins un mode de réception (Q10).');
+                return;
+            }
+
+            // Collect form data
+            const formData = new FormData(this);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+
+            // Display success message
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Scroll to success message
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+
+            // Here you would normally send the data to your server
+            console.log('Survey data:', data);
+            
+            // Optional: Reset form after 3 seconds
+            setTimeout(() => {
+                this.reset();
+                rangeValue.textContent = '5';
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
